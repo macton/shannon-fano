@@ -7,7 +7,7 @@
 
 typedef struct ptab
 {
-	char ch;
+	int ch;
 	float p;
 } ptab;
 
@@ -18,7 +18,7 @@ typedef struct buffer
 } buffer;
 
 ptab ptable[MAPSIZE];
-char codes[MAPSIZE][128];
+char codes[MAPSIZE][129];
 
 
 void pack(const char *input, const char *output);
@@ -52,7 +52,8 @@ main(int argc, char *argv[])
 void
 pack(const char *input, const char *output)
 {
-
+	extern ptab ptable[MAPSIZE];
+	extern char codes[MAPSIZE][129];
 	int freq_table[MAPSIZE], c, i, j;
 
 	FILE *infile = fopen(input, "r");
@@ -76,13 +77,10 @@ pack(const char *input, const char *output)
 		{
 			if (!freq_table[i])
 				continue;
-
 			ptable[size].ch = i;
 			ptable[size].p = (float)freq_table[i] / ftot;
 			size++;
 		}
-
-
 
 	for (i = 0; i < size; ++i)
 		{
@@ -93,10 +91,16 @@ pack(const char *input, const char *output)
 				}
 		}
 
+
+	for (i = 0; i < size; ++i)
+			{
+					printf("%c, %f\n", ptable[i].ch, ptable[i].p);
+			}
+
 	encode(0, size - 1);
 
 
-	for (i = 0; i < size; ++i)
+for (i = 0; i < size; ++i)
 		{
 				printf("%c, %s\n", ptable[i].ch, codes[ptable[i].ch]);
 		}
@@ -125,8 +129,9 @@ pack(const char *input, const char *output)
 				writebit(outfile, &buff, ch[j]);
 		}
 
-
 	fclose(outfile);
+
+
 	fclose(infile);
 }
 
@@ -135,6 +140,10 @@ encode(int li, int ri)
 {
 	if (li == ri)
 		return;
+
+	extern ptab ptable[MAPSIZE];
+	extern char codes[MAPSIZE][129];
+
 
 	int i, isp;
 	float p, phalf;
@@ -146,16 +155,16 @@ encode(int li, int ri)
 		}
 	else
 		{
-			phalf = 0;
+			phalf = 0.0f;
 			for(i = li; i <= ri; ++i)
 				phalf += ptable[i].p;
 
-			p = 0;
+			p = 0.0f;
 			isp = -1;
 			phalf *= 0.5f;
 			for(i = li; i <= ri; ++i)
 				{
-					p += ptable[i].p;
+
 					if(p <= phalf)
 						strcat(codes[ptable[i].ch], "0");
 					else
@@ -164,6 +173,7 @@ encode(int li, int ri)
 							if(isp < 0)
 								isp = i;
 						}
+					p += ptable[i].p;
 				}
 
 			if (isp < 0)
@@ -171,6 +181,7 @@ encode(int li, int ri)
 
 			encode(li, isp - 1);
 			encode(isp, ri);
+
 		}
 
 }
@@ -190,7 +201,7 @@ writebit(FILE *outfile, buffer *buff, char bit)
 		}
 	else
 		{
-			buff->v |= (b << (buff->size));
+			buff->v ^= (b << (buff->size));
 			++(buff->size);
 		}
 }
