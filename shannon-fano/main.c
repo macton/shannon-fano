@@ -7,18 +7,26 @@
 
 typedef struct ptab
 {
-	int ch;
+	char ch;
 	float p;
 } ptab;
 
+typedef struct buffer
+{
+	char v;
+	int size:3;
+} buffer;
+
 ptab ptable[MAPSIZE];
-char codes[MAPSIZE][20];
+char codes[MAPSIZE][128];
 
 
 void pack(const char *input, const char *output);
 void unpack(const char *input, const char *output);
 void swap(ptab v[], int i, int j);
 void encode(int li, int ri);
+
+void writebit(FILE *outfile, buffer *b, char bit);
 
 int
 main(int argc, char *argv[])
@@ -84,19 +92,37 @@ pack(const char *input, const char *output)
 						swap(ptable, i, j);
 				}
 		}
-	for (i = 0; i < size; ++i)
-		{
-			printf("%c, %f\n", ptable[i].ch, ptable[i].p);
-		}
-
 
 	encode(0, size - 1);
 
-	for (i = 0; i < MAPSIZE; ++i)
+
+	for (i = 0; i < size; ++i)
 		{
-			printf("%c, %s\n", i, codes[i]);
+				printf("%d, %s\n", ptable[i].ch, codes[i]);
 		}
 
+	FILE *outfile = fopen(output, "wb");
+	assert(outfile);
+
+	fprintf(outfile, "%i\t", size);
+	for (i = 0; i < size; ++i)
+		{
+			fprintf(outfile, "%c\t%s\t", ptable[i].ch, codes[ptable[i].ch]);
+		}
+
+	fseek(infile, SEEK_SET, 0);
+
+	buffer buff;
+	char *ch;
+	while ((c = getc(infile)) != EOF)
+		{
+			ch = codes[c];
+			while (ch++ != '\0')
+				writebit(outfile, &buff, *ch);
+		}
+
+
+	fclose(outfile);
 	fclose(infile);
 }
 
@@ -143,6 +169,25 @@ encode(int li, int ri)
 			encode(isp, ri);
 		}
 
+}
+void
+writebit(FILE *outfile, buffer *buff, char bit)
+{
+	if (bit != '0' && bit != '1')
+		return;
+
+	int b = (bit == '1') ? 1 : 0;
+	if (buff->size == 8)
+		{
+			putc(buff->v, outfile);
+			buff->v = 0;
+			buff->size = 0;
+		}
+	else
+		{
+			buff->v |= (b << (buff->size));
+			++(buff->size);
+		}
 }
 
 void
