@@ -14,7 +14,7 @@ typedef struct ptab
 typedef struct buffer
 {
 	char v;
-	int size:3;
+	int size;
 } buffer;
 
 ptab ptable[MAPSIZE];
@@ -98,12 +98,13 @@ pack(const char *input, const char *output)
 
 	for (i = 0; i < size; ++i)
 		{
-				printf("%d, %s\n", ptable[i].ch, codes[i]);
+				printf("%c, %s\n", ptable[i].ch, codes[ptable[i].ch]);
 		}
 
 	FILE *outfile = fopen(output, "wb");
 	assert(outfile);
 
+	
 	fprintf(outfile, "%i\t", size);
 	for (i = 0; i < size; ++i)
 		{
@@ -113,12 +114,15 @@ pack(const char *input, const char *output)
 	fseek(infile, SEEK_SET, 0);
 
 	buffer buff;
+	buff.size = 0;
+	buff.v = 0;
 	char *ch;
 	while ((c = getc(infile)) != EOF)
 		{
 			ch = codes[c];
-			while (ch++ != '\0')
-				writebit(outfile, &buff, *ch);
+			j = -1;
+			while (ch[++j] != '\0')
+				writebit(outfile, &buff, ch[j]);
 		}
 
 
@@ -176,7 +180,8 @@ writebit(FILE *outfile, buffer *buff, char bit)
 	if (bit != '0' && bit != '1')
 		return;
 
-	int b = (bit == '1') ? 1 : 0;
+	char b = (bit == '1') ? 1 : 0;
+
 	if (buff->size == 8)
 		{
 			putc(buff->v, outfile);
