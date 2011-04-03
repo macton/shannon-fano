@@ -23,8 +23,10 @@ char codes[MAPSIZE][129];
 
 void pack(const char *input, const char *output);
 void unpack(const char *input, const char *output);
+
 void swap(ptab v[], int i, int j);
 void encode(int li, int ri);
+void quicksort(ptab v[], int left, int right);
 
 void writebit(FILE *outfile, buffer *b, char bit);
 
@@ -61,9 +63,8 @@ pack(const char *input, const char *output)
 
 	unsigned total = 0;
 	for (i = 0; i < MAPSIZE; ++i)
-		{
 			freq_table[i] = 0;
-		}
+	
 	while ((c = getc(infile)) != EOF)
 		{
 			freq_table[c]++;
@@ -81,7 +82,7 @@ pack(const char *input, const char *output)
 			ptable[size].p = (float)freq_table[i] / ftot;
 			size++;
 		}
-
+/*
 	for (i = 0; i < size; ++i)
 		{
 			for (j = i; j < size; ++j)
@@ -90,30 +91,21 @@ pack(const char *input, const char *output)
 						swap(ptable, i, j);
 				}
 		}
+*/
+	quicksort(ptable, 0, size);
 
-
-	for (i = 0; i < size; ++i)
-			{
-					printf("%c, %f\n", ptable[i].ch, ptable[i].p);
-			}
 
 	encode(0, size - 1);
-
-
-for (i = 0; i < size; ++i)
-		{
-				printf("%c, %s\n", ptable[i].ch, codes[ptable[i].ch]);
-		}
-
+	for (i = 0; i < size; ++i)
+	{
+		printf("%c, %s\n", ptable[i].ch, codes[ptable[i].ch]);
+	}
 	FILE *outfile = fopen(output, "wb");
 	assert(outfile);
-
 	
 	fprintf(outfile, "%i\t", size);
 	for (i = 0; i < size; ++i)
-		{
 			fprintf(outfile, "%c\t%s\t", ptable[i].ch, codes[ptable[i].ch]);
-		}
 
 	fseek(infile, SEEK_SET, 0);
 
@@ -130,8 +122,6 @@ for (i = 0; i < size; ++i)
 		}
 
 	fclose(outfile);
-
-
 	fclose(infile);
 }
 
@@ -185,6 +175,24 @@ encode(int li, int ri)
 		}
 
 }
+
+void
+quicksort(ptab v[], int left, int right)
+{
+	int i, last;
+	if (left >= right)
+		return;
+	swap(v, left, (left + right) / 2);
+	last = left;
+	for (i = left + 1; i < right; ++i)
+		if (v[i].p > v[left].p)
+			swap(v, ++last, i);
+	swap(v, left, last);
+	quicksort(v, left, last - 1);
+	quicksort(v, last + 1, right);
+}
+
+
 void
 writebit(FILE *outfile, buffer *buff, char bit)
 {
@@ -210,12 +218,9 @@ void
 swap(ptab v[], int i, int j)
 {
 	ptab temp;
-	temp.ch = v[i].ch;
-	temp.p = v[i].p;
-	v[i].ch = v[j].ch;
-	v[i].p = v[j].p;
-	v[j].ch = temp.ch;
-	v[j].p = temp.p;
+	temp = v[i];
+	v[i] = v[j];
+	v[j] = temp;
 }
 
 void
