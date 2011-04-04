@@ -1,5 +1,31 @@
 #include "main.h"
 
+charbin
+chartobin(int val)
+{
+	charbin temp;
+	int i;
+	for (i = 0; i < 8; ++i)
+		{
+			temp.v[8 - i] = (val % 2 == 1) ? '1' : '0';
+			val /= 2;
+		}
+	return temp;
+}
+
+intbin
+inttobin(int val)
+{
+	intbin temp;
+	int i;
+	for (i = 0; i < 3; ++i)
+		{
+			temp.v[3 - i] = (val % 2 == 1) ? '1' : '0';
+			val /= 2;
+		}
+	return temp;
+}
+
 void
 writebit(FILE *outfile, buffer *buff, char bit)
 {

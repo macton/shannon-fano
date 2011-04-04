@@ -22,7 +22,7 @@ pack(const char *input, const char *output)
 
 	float ftot = (float)total;
 
-	int size = 0;
+	unsigned char size = 0;
 	for (i = 0; i < MAPSIZE; ++i)
 		{
 			if (!freq_table[i])
@@ -31,41 +31,44 @@ pack(const char *input, const char *output)
 			ptable[size].p = (float)freq_table[i] / ftot;
 			size++;
 		}
-/*
-	for (i = 0; i < size; ++i)
-		{
-			for (j = i; j < size; ++j)
-				{
-					if (ptable[i].p < ptable[j].p)
-						swap(ptable, i, j);
-				}
-		}
-*/
-	quicksort(ptable, 0, size);
 
+	quicksort(ptable, 0, size);
 	encode(0, size - 1);
+	
 	for (i = 0; i < size; ++i)
-	{
 		printf("%c, %s\n", ptable[i].ch, codes[ptable[i].ch]);
-	}
 	
 	FILE *outfile = fopen(output, "wb");
 	assert(outfile);
 	
-	fprintf(outfile, "%i\n", size);
-	long begin = ftell(outfile);
-	printf(">>>>>>>>>>>>>>>%i\n", begin);
-	for (i = 0; i < size; ++i)
-		{
-			//putc(ptable[i].ch, outfile);
-
-			fprintf(outfile, "%c%s\n", ptable[i].ch, codes[ptable[i].ch]);
-		}
-	fseek(infile, SEEK_SET, 0);
+	putc(size, outfile);
+	//long begin = ftell(outfile);	
 
 	buffer buff;
 	buff.size = buff.v = 0;
+
+	intbin codesize;
+	charbin codebin;
 	char *ch;
+	for (i = 0; i < size; ++i)
+		{
+			c = ptable[i].ch;
+			codebin = chartobin(c);
+			for (j = 0; j < 8; ++j)
+				writebit(outfile, &buff, codebin.v[j]);
+
+			codesize = inttobin(strlen(codes[c]));
+			for (j = 0; j < 3; ++j)
+				writebit(outfile, &buff, codesize.v[j]);
+			
+			j = -1;
+			ch = codes[c];
+			while (ch[++j] != '\0')
+				writebit(outfile, &buff, ch[j]);
+		}
+
+	fseek(infile, 0, SEEK_SET);
+	
 	while ((c = getc(infile)) != EOF)
 		{
 			ch = codes[c];
@@ -75,10 +78,11 @@ pack(const char *input, const char *output)
 				writebit(outfile, &buff, ch[j]);
 		}
 	if (buff.size != 8)
-			putc(buff.v, outfile);
-	//fseek(outfile, SEEK_SET, begin);
-	//fprintf(outfile, "%i\n", buff.size);
-
+		putc(buff.v, outfile);
+	
+	fseek(outfile, 1, SEEK_SET);
+	putc(buff.size, outfile);
+	
 	fclose(outfile);
 	fclose(infile);
 }
@@ -91,7 +95,6 @@ encode(int li, int ri)
 
 	extern ptab ptable[MAPSIZE];
 	extern char codes[MAPSIZE][129];
-
 
 	int i, isp;
 	float p, phalf;
@@ -112,7 +115,6 @@ encode(int li, int ri)
 			phalf *= 0.5f;
 			for(i = li; i <= ri; ++i)
 				{
-
 					if(p <= phalf)
 						strcat(codes[ptable[i].ch], "0");
 					else

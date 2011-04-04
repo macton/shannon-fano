@@ -30,7 +30,15 @@ typedef struct tree
   struct tree *right;
 } tree;
 
+typedef struct intbin
+{
+	char v[3];
+} intbin;
 
+typedef struct charbin
+{
+	char v[8];
+} charbin;
 
 ptab ptable[MAPSIZE];
 char codes[MAPSIZE][129];
@@ -46,3 +54,5 @@ void writebit(FILE *outfile, buffer *b, char bit);
 byte readbit(char val);
 
 void clear(tree *root);
+intbin inttobin(int val);
+charbin chartobin(int val);
