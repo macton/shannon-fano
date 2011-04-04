@@ -1,2 +1,2 @@
 main:
-	gcc main.c bintree.c bitop.c pack.c sort.c unpack.c -o shennon-fano
+	gcc main.c bintree.c bitop.c pack.c sort.c unpack.c -o shannon-fano

@@ -1,5 +1,22 @@
 #include "main.h"
 
+int
+bintoint(intbin val)
+{
+	int i, temp = 0;
+	for (i = 0; i < 3; ++i)
+		temp += (val.v[i] == '1') ? (1 << i) : 0;
+}
+
+int
+bintochar(charbin val)
+{
+	int i, temp = 0;
+	for (i = 0; i < 8; ++i)
+		temp += (val.v[i] == '1') ? (1 << i) : 0;
+	return temp;
+}
+
 charbin
 chartobin(int val)
 {
@@ -24,14 +41,13 @@ inttobin(int val)
 			val /= 2;
 		}
 	return temp;
-}
+	}
 
 void
 writebit(FILE *outfile, buffer *buff, char bit)
 {
 	if (bit != '0' && bit != '1')
 		return;
-//printf("[%d]", buff->v);
 	if (buff->size == 8)
 		{
 			putc(buff->v, outfile);
@@ -46,19 +62,16 @@ writebit(FILE *outfile, buffer *buff, char bit)
 	++(buff->size);
 }
 
-byte
-readbit(char val)
+int
+readbit(FILE *infile, buffer *buff)
 {
-	byte temp;
-
-	int i;
-	char tempr;
-	for (i = 0; i < 8; ++i)
-	{
-		tempr = 1 << i;
-		temp.v[i] = ((val & tempr) == tempr) ? '1' : '0';
-		//printf("[%c]", temp.v[i]);
-	}
-	temp.v[8] = '\0';
-	return temp;
+	if (buff->size == 0)
+		{
+			if ((buff->v = getc(infile)) == EOF)
+				return EOF;
+			buff->size = 8;
+		}
+	
+	--(buff->size);
+	return (((buff->v & (1 << buff->size)) >> buff->size) == 1) ? '1' : '0'; 
 }

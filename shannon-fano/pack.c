@@ -42,7 +42,6 @@ pack(const char *input, const char *output)
 	assert(outfile);
 	
 	putc(size, outfile);
-	//long begin = ftell(outfile);	
 
 	buffer buff;
 	buff.size = buff.v = 0;

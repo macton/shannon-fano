@@ -17,10 +17,6 @@ typedef struct buffer
 	int size;
 } buffer;
 
-typedef struct byte
-{
-	char v[9];
-} byte;
 
 typedef struct tree
 {
@@ -50,9 +46,14 @@ void swap(ptab v[], int i, int j);
 void encode(int li, int ri);
 void quicksort(ptab v[], int left, int right);
 
-void writebit(FILE *outfile, buffer *b, char bit);
-byte readbit(char val);
-
 void clear(tree *root);
+
+//binary
+void writebit(FILE *outfile, buffer *buff, char bit);
+int readbit(FILE *infile, buffer *buff);
+
 intbin inttobin(int val);
 charbin chartobin(int val);
+
+int bintoint(intbin val);
+int bintochar(charbin val);
