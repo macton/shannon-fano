@@ -35,6 +35,8 @@ pack(const char *input, const char *output)
 	quicksort(ptable, 0, size);
 	encode(0, size - 1);
 	
+	printf("code table size: %d\n", size);	
+	
 	for (i = 0; i < size; ++i)
 		printf("%c->%s\n", ptable[i].ch, codes[ptable[i].ch]);
 	
@@ -56,18 +58,11 @@ pack(const char *input, const char *output)
 				writebit(outfile, &buff, codebit[j]); // 8 bits of the code
 
 			sizetobit(strlen(codes[c]), codesize);
-			//for (j = 0; j < 8; ++j)
-				//printf("%c", codebit[j]);
-		//	putchar('\n');
 			for (j = 0; j < 3; ++j)
-			{
-				putchar(codesize[j]);
 				writebit(outfile, &buff, codesize[j]); // size of code
-			}
-			putchar('\n');
+			
 			j = -1;
 			ch = codes[c];
-			printf(">>%s\n", ch);
 			while (ch[++j] != '\0')
 				writebit(outfile, &buff, ch[j]); // code
 		}
@@ -86,7 +81,7 @@ pack(const char *input, const char *output)
 		putc(buff.v, outfile);
 	
 	putc(buff.size, outfile);
-	
+	putchar('\n');	
 	fclose(outfile);
 	fclose(infile);
 }
