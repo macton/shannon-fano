@@ -1,47 +1,44 @@
 #include "main.h"
 
 int
-bintoint(intbin val)
+bittosize(char v[])
 {
 	int i, temp = 0;
 	for (i = 0; i < 3; ++i)
-		temp += (val.v[i] == '1') ? (1 << i) : 0;
+		temp += (v[i] == '1') ? (1 << i) : 0;
+	return temp;
 }
 
 int
-bintochar(charbin val)
+bittochar(char v[])
 {
 	int i, temp = 0;
 	for (i = 0; i < 8; ++i)
-		temp += (val.v[i] == '1') ? (1 << i) : 0;
+		temp += (v[i] == '1') ? (1 << i) : 0;
 	return temp;
 }
 
-charbin
-chartobin(int val)
+void
+chartobit(int val, char v[])
 {
-	charbin temp;
 	int i;
 	for (i = 0; i < 8; ++i)
 		{
-			temp.v[8 - i] = (val % 2 == 1) ? '1' : '0';
+			v[8 - i] = (val % 2 == 1) ? '1' : '0';
 			val /= 2;
 		}
-	return temp;
 }
 
-intbin
-inttobin(int val)
+void
+sizetobit(int val, char v[])
 {
-	intbin temp;
 	int i;
 	for (i = 0; i < 3; ++i)
 		{
-			temp.v[3 - i] = (val % 2 == 1) ? '1' : '0';
+			v[3 - i] = (val % 2 == 1) ? '1' : '0';
 			val /= 2;
 		}
-	return temp;
-	}
+}
 
 void
 writebit(FILE *outfile, buffer *buff, char bit)

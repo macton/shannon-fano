@@ -46,24 +46,26 @@ pack(const char *input, const char *output)
 	buffer buff;
 	buff.size = buff.v = 0;
 
-	intbin codesize;
-	charbin codebin;
+	char codesize[3], codebit[8];
 	char *ch;
 	for (i = 0; i < size; ++i)
 		{
 			c = ptable[i].ch;
-			codebin = chartobin(c);
+			chartobit(c, codebit);
 			for (j = 0; j < 8; ++j)
-				writebit(outfile, &buff, codebin.v[j]);
+				writebit(outfile, &buff, codebit[j]); // 8 bits of the code
 
-			codesize = inttobin(strlen(codes[c]));
+			sizetobit(strlen(codes[c]), codesize);
+			//for (j = 0; j < 8; ++j)
+			//	printf("%c", codesize[j]);
+			//putchar('\n');
 			for (j = 0; j < 3; ++j)
-				writebit(outfile, &buff, codesize.v[j]);
+				writebit(outfile, &buff, codesize[j]); // size of code
 			
 			j = -1;
 			ch = codes[c];
 			while (ch[++j] != '\0')
-				writebit(outfile, &buff, ch[j]);
+				writebit(outfile, &buff, ch[j]); // code
 		}
 
 	fseek(infile, 0, SEEK_SET);
@@ -71,7 +73,7 @@ pack(const char *input, const char *output)
 	while ((c = getc(infile)) != EOF)
 		{
 			ch = codes[c];
-			printf("%s", ch);
+			//printf("%s", ch);
 			j = -1;
 			while (ch[++j] != '\0')
 				writebit(outfile, &buff, ch[j]);
@@ -79,7 +81,6 @@ pack(const char *input, const char *output)
 	if (buff.size != 8)
 		putc(buff.v, outfile);
 	
-	fseek(outfile, 1, SEEK_SET);
 	putc(buff.size, outfile);
 	
 	fclose(outfile);

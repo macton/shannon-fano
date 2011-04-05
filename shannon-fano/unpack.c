@@ -8,13 +8,12 @@ unpack(const char *input, const char *output)
 	int i, ch, j, c;
 
 	fseek(infile, -1L, SEEK_END);
-	unsigned long last = ftell(infile);
-	int lastsym = getc(infile);
+	unsigned long last = ftell(infile) - 2;
+	int buffsize = getc(infile);
 	fseek(infile, 0, SEEK_SET);
 
 	int size = getc(infile);
-	int buffsize = getc(infile);
-	
+		
 	tree root, *temp;
 	root.data = EOF;
 	root.parent = root.left = root.right = NULL;
@@ -22,19 +21,21 @@ unpack(const char *input, const char *output)
 	buffer buff;
 	buff.v = buff.size = 0;
 
-	charbin codebin;
-	intbin codesize;
+	char codebit[8], codesize[3];
 	int csize;
 
 	for (i = 0; i < size; ++i)
 		{
 			for (j = 0; j < 8; ++j)
-				codebin.v[j] = readbit(infile, &buff);
-			ch = bintochar(codebin);
-
+			{
+				codebit[j] = readbit(infile, &buff);
+				//putchar(codebit[j]);
+			}
+			//putchar('\n');
+			ch = bittochar(codebit);
 			for (j = 0; j < 3; ++j)
-				codesize.v[j] = readbit(infile, &buff);
-			csize = bintoint(codesize);
+				codesize[j] = readbit(infile, &buff);
+			csize = bittosize(codesize);
 
 			temp = &root;
 			for (j = 0; j < csize; ++j)
@@ -65,41 +66,34 @@ unpack(const char *input, const char *output)
 								temp = temp->right;
 						}
 				}
-			temp->data = ch;
-		
+			temp->data = ch;	
 		}
 
 	FILE *outfile = fopen(output, "w");
 	assert(outfile);
 	
 	temp = &root;
+
 	while ((c = readbit(infile, &buff)) != EOF)
 		{
-			if (ftell(infile) == last)
+			if ((ch = gototree(c, temp)) != EOF)
+				{
+					putc(ch, outfile);
+					temp = &root;
+				}
+
+			if (ftell(infile) == last && buff.size == 8)
 				{
 					for (i = 0; i < buffsize; ++i)
 						{
-							c = (((buff.v & (1 << i)) >> i) == 1) ? '1' : '0';
-							if (c == '0' && temp->left != NULL)
-								temp = temp->left;
-							else if (c == '1' && temp->right != NULL)
-								temp = temp->right;
-							if (temp->data != EOF)
+							c = readbit(infile, &buff);
+							if ((ch = gototree(c, temp)) != EOF)
 								{
-									putc(temp->data, outfile);
+									putc(ch, outfile);
 									temp = &root;
-								}
+								}	
 						}
-					break;
-				}
-			if (c == '0' && temp->left != NULL)
-				temp = temp->left;
-			else if (c == '1' && temp->right != NULL)
-				temp = temp->right;
-			if (temp->data != EOF)
-				{
-					putc(temp->data, outfile);
-					temp = &root;
+					break;	
 				}	
 		}
 	

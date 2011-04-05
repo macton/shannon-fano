@@ -26,34 +26,30 @@ typedef struct tree
   struct tree *right;
 } tree;
 
-typedef struct intbin
-{
-	char v[3];
-} intbin;
-
-typedef struct charbin
-{
-	char v[8];
-} charbin;
-
 ptab ptable[MAPSIZE];
 char codes[MAPSIZE][129];
 
+// pack.c
 void pack(const char *input, const char *output);
+void encode(int li, int ri);
+
+// unpack.c
 void unpack(const char *input, const char *output);
 
+// sort.c
 void swap(ptab v[], int i, int j);
-void encode(int li, int ri);
 void quicksort(ptab v[], int left, int right);
 
+// bintree.c
 void clear(tree *root);
+int gototree(char c, tree *t);
 
-//binary
+// bitop.c
 void writebit(FILE *outfile, buffer *buff, char bit);
 int readbit(FILE *infile, buffer *buff);
 
-intbin inttobin(int val);
-charbin chartobin(int val);
+void sizetobit(int val, char v[]);
+void chartobit(int val, char v[]);
 
-int bintoint(intbin val);
-int bintochar(charbin val);
+int bittosize(char v[]);
+int bittochar(char v[]);
