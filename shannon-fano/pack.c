@@ -36,7 +36,7 @@ pack(const char *input, const char *output)
 	encode(0, size - 1);
 	
 	for (i = 0; i < size; ++i)
-		printf("%c, %s\n", ptable[i].ch, codes[ptable[i].ch]);
+		printf("%c->%s\n", ptable[i].ch, codes[ptable[i].ch]);
 	
 	FILE *outfile = fopen(output, "wb");
 	assert(outfile);
@@ -57,13 +57,17 @@ pack(const char *input, const char *output)
 
 			sizetobit(strlen(codes[c]), codesize);
 			//for (j = 0; j < 8; ++j)
-			//	printf("%c", codesize[j]);
-			//putchar('\n');
+				//printf("%c", codebit[j]);
+		//	putchar('\n');
 			for (j = 0; j < 3; ++j)
+			{
+				putchar(codesize[j]);
 				writebit(outfile, &buff, codesize[j]); // size of code
-			
+			}
+			putchar('\n');
 			j = -1;
 			ch = codes[c];
+			printf(">>%s\n", ch);
 			while (ch[++j] != '\0')
 				writebit(outfile, &buff, ch[j]); // code
 		}
@@ -73,7 +77,7 @@ pack(const char *input, const char *output)
 	while ((c = getc(infile)) != EOF)
 		{
 			ch = codes[c];
-			//printf("%s", ch);
+			printf("%s", ch);
 			j = -1;
 			while (ch[++j] != '\0')
 				writebit(outfile, &buff, ch[j]);

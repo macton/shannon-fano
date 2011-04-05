@@ -21,7 +21,6 @@ typedef struct buffer
 typedef struct tree
 {
   char data;
-  struct tree *parent;
   struct tree *left;
   struct tree *right;
 } tree;
@@ -42,7 +41,7 @@ void quicksort(ptab v[], int left, int right);
 
 // bintree.c
 void clear(tree *root);
-int gototree(char c, tree *t);
+int gototree(char c, tree **t);
 
 // bitop.c
 void writebit(FILE *outfile, buffer *buff, char bit);

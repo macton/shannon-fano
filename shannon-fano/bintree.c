@@ -5,17 +5,18 @@ clear(tree *root)
 {
 	if (root->left != NULL)
 		clear(root->left);
-	if (root->right!= NULL)
+	if (root->right != NULL)
 		clear(root->right);
+	
+	free(root);
 }
 
 int
-gototree(char c, tree *t)
+gototree(char c, tree **t)
 {
-	if (c == '0' && t->left != NULL)
-		t = t->left;
-	else if (c == '1' && t->right != NULL)
-		t = t->right;
-
-	return (t->data == EOF) ? EOF : t->data;
+	if (c == '0')
+		(*t) = (*t)->left;
+	else if (c == '1')
+		(*t) = (*t)->right;
+	return (*t)->data;
 }
