@@ -6,7 +6,7 @@ bittosize(char v[])
 	int i, temp = 0;
 	for (i = 0; i < CODESIZE; ++i)
 		temp += (v[CODESIZE - 1 - i] == '1') ? (1 << i) : 0;
-	return temp;
+	return temp + 1;
 }
 
 int
@@ -21,6 +21,7 @@ bittochar(char v[])
 void
 chartobit(int val, char v[])
 {
+	--val;
 	int i;
 	for (i = SYMBSIZE - 1; i > -1; --i)
 		{
