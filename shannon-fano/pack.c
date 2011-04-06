@@ -1,10 +1,12 @@
 #include "main.h"
-static ptab ptable[MAPSIZE];
-static char codes[MAPSIZE][129];
 
 void
 pack(const char *input, const char *output)
 {
+#ifdef STAT
+	clock_t time1, time2;
+	time1 = clock();
+#endif
 	int freq_table[MAPSIZE], c, i, j;
 
 	FILE *infile = fopen(input, "r");
@@ -12,7 +14,7 @@ pack(const char *input, const char *output)
 
 	unsigned total = 0;
 	for (i = 0; i < MAPSIZE; ++i)
-		freq_table[i] = 0;
+			freq_table[i] = 0;
 	
 	while ((c = getc(infile)) != EOF)
 		{
@@ -35,7 +37,18 @@ pack(const char *input, const char *output)
 	quicksort(ptable, 0, size);
 	encode(0, size - 1);
 	
-	printf("code table size: %d\n", size);	
+	printf("code table size: %d\n", size);
+
+#ifdef STAT
+	FILE *codetable = fopen("codetable", "wb");
+	assert(codetable);
+	for (i = 0; i < size; ++i)
+		{
+			fprintf(codetable, "%c %s %f \n", ptable[i].ch, codes[ptable[i].ch], ptable[i].p);
+			printf("%c->%s\n", ptable[i].ch, codes[ptable[i].ch]);
+		}
+	fclose(codetable);
+#endif
 	
 	for (i = 0; i < size; ++i)
 		printf("%c->%s\n", ptable[i].ch, codes[ptable[i].ch]);
@@ -48,13 +61,13 @@ pack(const char *input, const char *output)
 	buffer buff;
 	buff.size = buff.v = 0;
 
-	char codesize[CODESIZE], codebit[SYMBSIZE], *ch;
-
+	char codesize[CODESIZE], codebit[8];
+	char *ch;
 	for (i = 0; i < size; ++i)
 		{
 			c = ptable[i].ch;
 			chartobit(c, codebit);
-			for (j = 0; j < SYMBSIZE; ++j)
+			for (j = 0; j < 8; ++j)
 				writebit(outfile, &buff, codebit[j]); // 8 bits of the code
 
 			sizetobit(strlen(codes[c]), codesize);
@@ -84,6 +97,36 @@ pack(const char *input, const char *output)
 	putchar('\n');	
 	fclose(outfile);
 	fclose(infile);
+
+#ifdef STAT
+	time2 = clock();
+	printf("time:%f\n", (double)(time2 - time1) / (double)CLOCKS_PER_SEC);
+
+	unsigned long charc = 0;
+
+	infile = fopen(output, "r");
+	assert(infile);
+	for (i = 0; i < MAPSIZE; ++i)
+		freq_table[i] = 0;
+
+	while ((c = getc(infile)) != EOF)
+		{
+			freq_table[c]++;
+			charc++;
+		}
+
+	float entropy = 0, temp;
+	for (i = 0; i < MAPSIZE; ++i)
+		{
+			if (!freq_table[i])
+				continue;
+			temp = (float)freq_table[i] / (float)charc;
+			entropy += temp * log2(temp);
+		}
+	printf("Entropy:%f\n", -entropy);
+	printf("The average number of bits: %f\n", (float)charc * 8 / ftot);
+	fclose(infile);
+#endif
 }
 
 void
@@ -91,6 +134,9 @@ encode(int li, int ri)
 {
 	if (li == ri)
 		return;
+
+	extern ptab ptable[MAPSIZE];
+	extern char codes[MAPSIZE][129];
 
 	int i, isp;
 	float p, phalf;
@@ -129,6 +175,7 @@ encode(int li, int ri)
 			encode(isp, ri);
 
 		}
+
 }
 
 void

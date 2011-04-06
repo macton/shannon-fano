@@ -3,6 +3,10 @@
 void
 unpack(const char *input, const char *output)
 {
+#ifdef STAT
+	clock_t time1, time2;
+	time1 = clock();
+#endif
 	FILE *infile = fopen(input, "r");
 	assert(infile);
 	int i, ch, j, c;
@@ -21,12 +25,12 @@ unpack(const char *input, const char *output)
 	buffer buff;
 	buff.v = buff.size = 0;
 
-	char codebit[SYMBSIZE], codesize[CODESIZE];
+	char codebit[8], codesize[CODESIZE];
 	int csize;
 
 	for (i = 0; i < size; ++i)
 		{
-			for (j = 0; j < SYMBSIZE; ++j)
+			for (j = 0; j < 8; ++j)
 				codebit[j] = readbit(infile, &buff);
 			
 			ch = bittochar(codebit);
@@ -97,5 +101,9 @@ unpack(const char *input, const char *output)
 	clear(root);	
 	fclose(outfile);
 	fclose(infile);
+#ifdef STAT
+	time2 = clock();
+	printf("time:%f\n", (double)(time2 - time1) / (double)CLOCKS_PER_SEC);
+#endif
 }
 

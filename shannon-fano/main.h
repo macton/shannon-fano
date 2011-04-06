@@ -1,11 +1,17 @@
+#define STAT
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 
+#ifdef STAT
+#include <math.h>
+#include <time.h>
+#endif
+
 #define MAPSIZE 256
-#define SYMBSIZE 8
-#define CODESIZE 7
+#define CODESIZE 8
 
 typedef struct ptab
 {
@@ -27,7 +33,8 @@ typedef struct tree
   struct tree *right;
 } tree;
 
-
+ptab ptable[MAPSIZE];
+char codes[MAPSIZE][129];
 
 // pack.c
 void pack(const char *input, const char *output);
