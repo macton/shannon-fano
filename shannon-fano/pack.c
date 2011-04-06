@@ -1,10 +1,10 @@
 #include "main.h"
+static ptab ptable[MAPSIZE];
+static char codes[MAPSIZE][129];
 
 void
 pack(const char *input, const char *output)
 {
-	extern ptab ptable[MAPSIZE];
-	extern char codes[MAPSIZE][129];
 	int freq_table[MAPSIZE], c, i, j;
 
 	FILE *infile = fopen(input, "r");
@@ -12,7 +12,7 @@ pack(const char *input, const char *output)
 
 	unsigned total = 0;
 	for (i = 0; i < MAPSIZE; ++i)
-			freq_table[i] = 0;
+		freq_table[i] = 0;
 	
 	while ((c = getc(infile)) != EOF)
 		{
@@ -48,17 +48,17 @@ pack(const char *input, const char *output)
 	buffer buff;
 	buff.size = buff.v = 0;
 
-	char codesize[3], codebit[8];
-	char *ch;
+	char codesize[CODESIZE], codebit[SYMBSIZE], *ch;
+
 	for (i = 0; i < size; ++i)
 		{
 			c = ptable[i].ch;
 			chartobit(c, codebit);
-			for (j = 0; j < 8; ++j)
+			for (j = 0; j < SYMBSIZE; ++j)
 				writebit(outfile, &buff, codebit[j]); // 8 bits of the code
 
 			sizetobit(strlen(codes[c]), codesize);
-			for (j = 0; j < 3; ++j)
+			for (j = 0; j < CODESIZE; ++j)
 				writebit(outfile, &buff, codesize[j]); // size of code
 			
 			j = -1;
@@ -92,16 +92,13 @@ encode(int li, int ri)
 	if (li == ri)
 		return;
 
-	extern ptab ptable[MAPSIZE];
-	extern char codes[MAPSIZE][129];
-
 	int i, isp;
 	float p, phalf;
 
 	if (ri - li == 1)
 		{
-			strcat(codes[ptable[li].ch], "0");
-			strcat(codes[ptable[ri].ch], "1");
+			charcat(codes[ptable[li].ch], '0');
+			charcat(codes[ptable[ri].ch], '1');
 		}
 	else
 		{
@@ -115,10 +112,10 @@ encode(int li, int ri)
 			for(i = li; i <= ri; ++i)
 				{
 					if(p <= phalf)
-						strcat(codes[ptable[i].ch], "0");
+						charcat(codes[ptable[i].ch], '0');
 					else
 						{
-							strcat(codes[ptable[i].ch], "1");
+							charcat(codes[ptable[i].ch], '1');
 							if(isp < 0)
 								isp = i;
 						}
@@ -132,6 +129,14 @@ encode(int li, int ri)
 			encode(isp, ri);
 
 		}
-
 }
 
+void
+charcat(char s[], char t)
+{
+	int i = 0;
+	while (s[i] != '\0')
+		i++;
+	s[i++] = t;
+	s[i++] = '\0';
+}

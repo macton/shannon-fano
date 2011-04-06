@@ -4,6 +4,8 @@
 #include <assert.h>
 
 #define MAPSIZE 256
+#define SYMBSIZE 8
+#define CODESIZE 7
 
 typedef struct ptab
 {
@@ -25,12 +27,12 @@ typedef struct tree
   struct tree *right;
 } tree;
 
-ptab ptable[MAPSIZE];
-char codes[MAPSIZE][129];
+
 
 // pack.c
 void pack(const char *input, const char *output);
 void encode(int li, int ri);
+void charcat(char s[], char t);
 
 // unpack.c
 void unpack(const char *input, const char *output);

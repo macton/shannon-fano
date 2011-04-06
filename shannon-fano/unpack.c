@@ -21,16 +21,16 @@ unpack(const char *input, const char *output)
 	buffer buff;
 	buff.v = buff.size = 0;
 
-	char codebit[8], codesize[3];
+	char codebit[SYMBSIZE], codesize[CODESIZE];
 	int csize;
 
 	for (i = 0; i < size; ++i)
 		{
-			for (j = 0; j < 8; ++j)
+			for (j = 0; j < SYMBSIZE; ++j)
 				codebit[j] = readbit(infile, &buff);
 			
 			ch = bittochar(codebit);
-			for (j = 0; j < 3; ++j)
+			for (j = 0; j < CODESIZE; ++j)
 				codesize[j] = readbit(infile, &buff);
 			
 			csize = bittosize(codesize);
