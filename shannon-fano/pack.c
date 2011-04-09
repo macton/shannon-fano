@@ -1,54 +1,21 @@
 #include "main.h"
 
+static ptab ptable[MAPSIZE];
+static char codes[MAPSIZE][256];
+
 void
 pack(const char *input, const char *output)
 {
-#ifdef STAT
-	clock_t time1, time2;
-	time1 = clock();
-#endif
-	int freq_table[MAPSIZE], c, i, j;
+	int c, i, j;
 
 	FILE *infile = fopen(input, "r");
 	assert(infile);
 
-	unsigned total = 0;
-	for (i = 0; i < MAPSIZE; ++i)
-			freq_table[i] = 0;
-	
-	while ((c = getc(infile)) != EOF)
-		{
-			freq_table[c]++;
-			total++;
-		}
+	int size = ptablebuild(infile, ptable);
 
-	float ftot = (float)total;
-
-	unsigned char size = 0;
-	for (i = 0; i < MAPSIZE; ++i)
-		{
-			if (!freq_table[i])
-				continue;
-			ptable[size].ch = i;
-			ptable[size].p = (float)freq_table[i] / ftot;
-			size++;
-		}
-
-	quicksort(ptable, 0, size);
 	encode(0, size - 1);
-	
-	printf("code table size: %d\n", size);
 
-#ifdef STAT
-	FILE *codetable = fopen("codetable", "wb");
-	assert(codetable);
-	for (i = 0; i < size; ++i)
-		{
-			fprintf(codetable, "%c %s %f \n", ptable[i].ch, codes[ptable[i].ch], ptable[i].p);
-			printf("%c->%s\n", ptable[i].ch, codes[ptable[i].ch]);
-		}
-	fclose(codetable);
-#endif
+	printf("code table size: %d\n", size);
 	
 	for (i = 0; i < size; ++i)
 		printf("%c->%s\n", ptable[i].ch, codes[ptable[i].ch]);
@@ -56,13 +23,12 @@ pack(const char *input, const char *output)
 	FILE *outfile = fopen(output, "wb");
 	assert(outfile);
 	
-	putc(size, outfile);
+	putc(size - 1, outfile);
 
 	buffer buff;
 	buff.size = buff.v = 0;
 
-	char codesize[CODESIZE], codebit[8];
-	char *ch;
+	char codesize[8], codebit[8], *ch;
 	for (i = 0; i < size; ++i)
 		{
 			c = ptable[i].ch;
@@ -70,8 +36,8 @@ pack(const char *input, const char *output)
 			for (j = 0; j < 8; ++j)
 				writebit(outfile, &buff, codebit[j]); // 8 bits of the code
 
-			sizetobit(strlen(codes[c]), codesize);
-			for (j = 0; j < CODESIZE; ++j)
+			chartobit(strlen(codes[c]) - 1, codesize);
+			for (j = 0; j < 8; ++j)
 				writebit(outfile, &buff, codesize[j]); // size of code
 			
 			j = -1;
@@ -85,7 +51,6 @@ pack(const char *input, const char *output)
 	while ((c = getc(infile)) != EOF)
 		{
 			ch = codes[c];
-			printf("%s", ch);
 			j = -1;
 			while (ch[++j] != '\0')
 				writebit(outfile, &buff, ch[j]);
@@ -94,39 +59,40 @@ pack(const char *input, const char *output)
 		putc(buff.v, outfile);
 	
 	putc(buff.size, outfile);
-	putchar('\n');	
+
 	fclose(outfile);
 	fclose(infile);
+}
 
-#ifdef STAT
-	time2 = clock();
-	printf("time:%f\n", (double)(time2 - time1) / (double)CLOCKS_PER_SEC);
+int
+ptablebuild(FILE *infile, ptab ptable[])
+{
+	int freq_table[MAPSIZE], i, c;
 
-	unsigned long charc = 0;
-
-	infile = fopen(output, "r");
-	assert(infile);
+	unsigned long total = 0;
 	for (i = 0; i < MAPSIZE; ++i)
-		freq_table[i] = 0;
+			freq_table[i] = 0;
 
 	while ((c = getc(infile)) != EOF)
 		{
 			freq_table[c]++;
-			charc++;
+			total++;
 		}
 
-	float entropy = 0, temp;
+	double ftot = (double)total;
+
+	int size = 0;
 	for (i = 0; i < MAPSIZE; ++i)
 		{
 			if (!freq_table[i])
 				continue;
-			temp = (float)freq_table[i] / (float)charc;
-			entropy += temp * log2(temp);
+			ptable[size].ch = i;
+			ptable[size].p = (double)freq_table[i] / ftot;
+			size++;
 		}
-	printf("Entropy:%f\n", -entropy);
-	printf("The average number of bits: %f\n", (float)charc * 8 / ftot);
-	fclose(infile);
-#endif
+
+	quicksort(ptable, 0, size);
+	return size;
 }
 
 void
@@ -134,9 +100,6 @@ encode(int li, int ri)
 {
 	if (li == ri)
 		return;
-
-	extern ptab ptable[MAPSIZE];
-	extern char codes[MAPSIZE][129];
 
 	int i, isp;
 	float p, phalf;

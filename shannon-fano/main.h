@@ -5,13 +5,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#ifdef STAT
-#include <math.h>
-#include <time.h>
-#endif
-
 #define MAPSIZE 256
-#define CODESIZE 8
 
 typedef struct ptab
 {
@@ -28,36 +22,35 @@ typedef struct buffer
 
 typedef struct tree
 {
-  char data;
+  int data;
   struct tree *left;
   struct tree *right;
 } tree;
 
-ptab ptable[MAPSIZE];
-char codes[MAPSIZE][129];
+
 
 // pack.c
 void pack(const char *input, const char *output);
 void encode(int li, int ri);
 void charcat(char s[], char t);
+int ptablebuild(FILE *infile, ptab v[]);
 
 // unpack.c
 void unpack(const char *input, const char *output);
+void buildtree(FILE *infile, tree *root, buffer *buff);
 
 // sort.c
 void swap(ptab v[], int i, int j);
-void quicksort(ptab v[], int left, int right);
+void quicksort(ptab v[],int first, int last);
 
 // bintree.c
 void clear(tree *root);
 int gototree(char c, tree **t);
+tree* addelement(int v);
 
 // bitop.c
 void writebit(FILE *outfile, buffer *buff, char bit);
 int readbit(FILE *infile, buffer *buff);
 
-void sizetobit(int val, char v[]);
 void chartobit(int val, char v[]);
-
-int bittosize(char v[]);
 int bittochar(char v[]);

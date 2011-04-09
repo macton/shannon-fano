@@ -1,20 +1,12 @@
 #include "main.h"
 
 int
-bittosize(char v[])
-{
-	int i, temp = 0;
-	for (i = 0; i < CODESIZE; ++i)
-		temp += (v[CODESIZE - 1 - i] == '1') ? (1 << i) : 0;
-	return temp + 1;
-}
-
-int
 bittochar(char v[])
 {
 	int i, temp = 0;
 	for (i = 0; i < 8; ++i)
-		temp += (v[7 - i] == '1') ? (1 << i) : 0;
+		if (v[7 - i] == '1')
+			temp += (1 << i);
 	return temp;
 }
 
@@ -22,35 +14,23 @@ void
 chartobit(int val, char v[])
 {
 	int i;
-	for (i = 7; i > -1; --i)
+	for (i = 7; i > 0; --i)
 		{
 			v[i] = (val % 2 == 1) ? '1' : '0';
 			val /= 2;
 		}
-}
-
-void
-sizetobit(int val, char v[])
-{
-	--val;
-	int i;
-	for (i = CODESIZE - 1; i > -1; --i)
-		{
-			v[i] = (val % 2 == 1) ? '1' : '0';
-			val /= 2;
-		}
+	v[0] = (val % 2 == 1) ? '1' : '0';
 }
 
 void
 writebit(FILE *outfile, buffer *buff, char bit)
 {
-	if (bit != '0' && bit != '1')
-		return;
 	if (buff->size == 8)
 		{
 			putc(buff->v, outfile);
 			buff->v = buff->size = 0;
 		}
+
 	if (bit == '1')
 		buff->v |= (1 << buff->size);
 	else
@@ -68,5 +48,6 @@ readbit(FILE *infile, buffer *buff)
 		}
 	
 	--(buff->size);
-	return (((buff->v & (1 << (7 - buff->size))) >> (7 - buff->size)) == 1) ? '1' : '0'; 
+	return (((buff->v & (1 << (7 - buff->size)))
+				>> (7 - buff->size)) == 1) ? '1' : '0'; 
 }

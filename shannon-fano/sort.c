@@ -1,19 +1,28 @@
 #include "main.h"
 
 void
-quicksort(ptab v[], int left, int right)
+quicksort(ptab v[],int first, int last)
 {
-	int i, last;
-	if (left >= right)
-		return;
-	swap(v, left, (left + right) / 2);
-	last = left;
-	for (i = left + 1; i < right; ++i)
-		if (v[i].p > v[left].p)
-			swap(v, ++last, i);
-	swap(v, left, last);
-	quicksort(v, left, last - 1);
-	quicksort(v, last + 1, right);
+		int i = first, j = last;
+		ptab x = v[(first + last) / 2];
+
+		do {
+				while (v[i].p < x.p) i++;
+				while (v[j].p > x.p) j--;
+
+				if(i <= j)
+					{
+						if (i < j)
+							swap(v, i, j);
+						i++;
+						j--;
+					}
+		} while (i <= j);
+
+		if (i < last)
+			quicksort(v, i, last);
+		if (first < j)
+				quicksort(v, first,j);
 }
 
 void

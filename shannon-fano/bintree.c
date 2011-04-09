@@ -16,7 +16,16 @@ gototree(char c, tree **t)
 {
 	if (c == '0')
 		(*t) = (*t)->left;
-	else if (c == '1')
+	else
 		(*t) = (*t)->right;
 	return (*t)->data;
 }
+
+tree*
+addelement(int v)
+{
+	tree *node = (tree*) malloc(sizeof(tree));
+	node->right = node->left = NULL;
+	node->data = v;
+	return node;
+} 
