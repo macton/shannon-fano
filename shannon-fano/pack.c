@@ -6,6 +6,10 @@ static char codes[MAPSIZE][256];
 void
 pack(const char *input, const char *output)
 {
+#ifdef STAT
+	clock_t time1, time2;
+	time1 = clock();
+#endif
 	int c, i, j;
 
 	FILE *infile = fopen(input, "r");
@@ -16,6 +20,17 @@ pack(const char *input, const char *output)
 	encode(0, size - 1);
 
 	printf("code table size: %d\n", size);
+
+#ifdef STAT
+	FILE *codetable = fopen("codetable", "wb");
+	assert(codetable);
+	for (i = 0; i < size; ++i)
+		{
+			fprintf(codetable, "%c %s %f \n", ptable[i].ch, codes[ptable[i].ch], ptable[i].p);
+			printf("%c->%s\n", ptable[i].ch, codes[ptable[i].ch]);
+		}
+	fclose(codetable);
+#endif
 	
 	for (i = 0; i < size; ++i)
 		printf("%c->%s\n", ptable[i].ch, codes[ptable[i].ch]);
@@ -62,6 +77,11 @@ pack(const char *input, const char *output)
 
 	fclose(outfile);
 	fclose(infile);
+
+#ifdef STAT
+	time2 = clock();
+	printf("time:%f\n", (double)(time2 - time1) / (double)CLOCKS_PER_SEC);
+#endif
 }
 
 int
@@ -90,7 +110,7 @@ ptablebuild(FILE *infile, ptab ptable[])
 			ptable[size].p = (double)freq_table[i] / ftot;
 			size++;
 		}
-
+	
 	quicksort(ptable, 0, size);
 	return size;
 }

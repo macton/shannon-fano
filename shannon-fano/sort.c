@@ -7,8 +7,8 @@ quicksort(ptab v[],int first, int last)
 		ptab x = v[(first + last) / 2];
 
 		do {
-				while (v[i].p < x.p) i++;
-				while (v[j].p > x.p) j--;
+				while (v[i].p > x.p) i++;
+				while (v[j].p < x.p) j--;
 
 				if(i <= j)
 					{

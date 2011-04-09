@@ -6,7 +6,11 @@
 #include <assert.h>
 
 #define MAPSIZE 256
+#define STAT
 
+#ifdef STAT
+#include <time.h>
+#endif
 typedef struct ptab
 {
 	int ch;

@@ -3,6 +3,10 @@
 void
 unpack(const char *input, const char *output)
 {
+#ifdef STAT
+	clock_t time1, time2;
+	time1 = clock();
+#endif
 	FILE *infile = fopen(input, "r");
 	assert(infile);
 
@@ -35,25 +39,29 @@ unpack(const char *input, const char *output)
 				}
 		}
 
-	if ((ch = gototree(c, &temp)) != EOF)
-		{
-			putc(ch, outfile);
-			temp = root;
-		}
+		if ((ch = gototree(c, &temp)) != EOF)
+			{
+				putc(ch, outfile);
+				temp = root;
+			}
 
-	for (i = 0; i < buffsize - 1; ++i)
-		{
-			c = readbit(infile, &buff);
-			if ((ch = gototree(c, &temp)) != EOF)
-				{
-					putc(ch, outfile);
-					temp = root;
-				}
-		}
-	
+		for (i = 0; i < buffsize - 1; ++i)
+			{
+				c = readbit(infile, &buff);
+				if ((ch = gototree(c, &temp)) != EOF)
+					{
+						putc(ch, outfile);
+						temp = root;
+					}
+			}
 	clear(root);	
 	fclose(outfile);
 	fclose(infile);
+
+#ifdef STAT
+	time2 = clock();
+	printf("time:%f\n", (double)(time2 - time1) / (double)CLOCKS_PER_SEC);
+#endif
 }
 
 void
